@@ -16,6 +16,7 @@ jobs:
             cp .env.pipelines .env
             sed -ie "s|__MONGO_URI__|$MONGO_URI|g" .env
             sed -ie "s|__NODE_ENV__|$NODE_ENV|g" .env
+            export NODE_ENV='development'
       - restore_cache:
           name: Restore node cache
           keys:
