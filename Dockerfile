@@ -4,13 +4,15 @@ ENV PORT=3000
 
 WORKDIR /app
 
-COPY ["package.json", "package-lock.json", "./"]
+COPY [ "package.json", "package-lock.json", "./" ]
 COPY [ "client/package.json", "client/package-lock.json", "./client/" ]
 
 RUN npm ci && \
     npm ci --prefix client
 
 COPY . .
+
+VOLUME [ "/app" ]
 
 EXPOSE 3000
 
