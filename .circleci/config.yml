@@ -1,0 +1,69 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@2.0.0
+  aws-ecr: circleci/aws-ecr@7.3.0
+
+jobs:
+  build:
+    docker:
+      - image: cimg/node:16.13.2
+    steps:
+      - checkout
+      - run:
+          name: Prepare Environment Variables
+          command: |
+            cp .env.pipelines .env
+            sed -ie "s|__MONGO_URI__|$MONGO_URI|g" .env
+            sed -ie "s|__NODE_ENV__|$NODE_ENV|g" .env
+      - restore_cache:
+          name: Restore node cache
+          keys:
+            - node-dependencies-{{ checksum "package.json" }}
+            - node-dependencies-
+      - run:
+          name: Install node packages
+          command: npm ci
+      - save_cache:
+          name: Save node cache
+          key: node-dependencies-{{ checksum "package.json" }}
+          paths:
+            - ./node_modules
+      - run:
+          name: Build vue files
+          command: npm run build --prefix client
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - ./
+    
+  # Docker image builds need to be optimized somehow... 
+    # Look into https://circleci.com/docs/2.0/docker-layer-caching/ and consider breaking up the PMA Image build and the custom image build into separate, parallel jobs.
+  aws-deploy:
+    machine: true
+    steps:
+      - attach_workspace:
+          at: ./
+      - aws-cli/setup:
+          override-installed: true
+      - aws-ecr/build-and-push-image:
+          account-url: ECR_URL
+          attach-workspace: false
+          aws-access-key-id: ECR_ACCESS_KEY
+          aws-secret-access-key: ECR_SECRET_KEY
+          checkout: false
+          dockerfile: Dockerfile
+          no-output-timeout: 5m
+          region: ECR_REGION
+          repo: mevn-testing-bucket-list
+
+workflows:
+  deploy:
+    jobs:
+      - build
+      - aws-deploy:
+          filters:
+            branches:
+              only: master
+          requires:
+            - build
