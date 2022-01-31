@@ -23,7 +23,9 @@ jobs:
             - node-dependencies-
       - run:
           name: Install node packages
-          command: npm ci
+          command: |
+            npm ci
+            npm ci --prefix client
       - save_cache:
           name: Save node cache
           key: node-dependencies-{{ checksum "package.json" }}
