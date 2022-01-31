@@ -1,13 +1,14 @@
 FROM node:16.13.2
 
-ENV NODE_ENV=production
 ENV PORT=3000
 
 WORKDIR /app
 
-COPY ["package.json", "package-lock.json", "client/package.json", "client/package-lock.json", "./"]
+COPY ["package.json", "package-lock.json", "./"]
+COPY [ "client/package.json", "client/package-lock.json", "./client/" ]
 
-RUN npm install --production
+RUN npm ci && \
+    npm ci --prefix client
 
 COPY . .
 
