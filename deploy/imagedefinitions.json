@@ -1,0 +1,6 @@
+[
+    {
+      "name": "bucket-list-app",
+      "imageUri": "412430435138.dkr.ecr.us-west-2.amazonaws.com/mevn-testing-bucket-list:latest"
+    }
+]
