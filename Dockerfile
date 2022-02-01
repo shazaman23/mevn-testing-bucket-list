@@ -12,8 +12,6 @@ RUN npm ci && \
 
 COPY . .
 
-VOLUME [ "/app" ]
-
 EXPOSE 3000
 
 CMD [ "node", "server.js" ]
